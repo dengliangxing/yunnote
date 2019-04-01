@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>云笔记系统</title>
+    <!--需要联网-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <link rel="stylesheet" href="static/assets/materialize/css/materialize.min.css" media="screen,projection"/>
+    <!-- Bootstrap Styles-->
+    <link href="static/assets/css/bootstrap.css" rel="stylesheet"/>
+    <!-- FontAwesome Styles-->
+    <link href="static/assets/css/font-awesome.css" rel="stylesheet"/>
+    <!-- Morris Chart Styles-->
+    <link href="static/assets/js/morris/morris-0.4.3.min.css" rel="stylesheet"/>
+    <!-- Custom Styles-->
+    <link href="static/assets/css/custom-styles.css" rel="stylesheet"/>
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
+    <link rel="stylesheet" href="/static/assets/js/Lightweight-Chart/cssCharts.css">
+</head>
+
+<body>
+
+<div id="wrapper">
+    <nav class="navbar navbar-default top-navbar" role="navigation">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle waves-effect waves-dark" data-toggle="collapse"
+                    data-target=".sidebar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand waves-effect waves-yellow"><i
+                    class="large materialbox-caption">insert_chart</i>
+                <strong>云笔记系统</strong></a>
+
+            <div id="sideNav" href=""><i class="material-icons dp48">toc</i></div>
+        </div>
+        <!--用户登录信息-->
+        <ul class="nav navbar-top-links navbar-right">
+            <li><a class="dropdown-button waves-effect waves-dark" href="#" data-activates="dropdown1"><i
+                    class="fa fa-user fa-fw"></i> <b th:unless="${session.SESSION == null}" th:text="${session.SESSION.userName}"></b> <i
+                    class="material-icons right">arrow_drop_down</i></a></li>
+        </ul>
+    </nav>
+    <input hidden="hidden" id="roles" name="roles" th:value="${roles}"/>
+    <!--用户登录栏的具体信息-->
+    <ul id="dropdown1" class="dropdown-content">
+        <li><a th:href="@{/myAccount.do}"><i class="fa fa-user fa-fw"></i>我的账户</a>
+        </li>
+        <li><a th:href="@{/logout.do}"><i class="fa fa-sign-out fa-fw"></i>退出登录</a>
+        </li>
+    </ul>
+
+    <!--侧边栏-->
+    <nav class="navbar-default navbar-side" role="navigation">
+        <div class="sidebar-collapse">
+            <ul class="nav" id="main-menu">
+
+                <li>
+                    <a th:href="@{'/head.do?roles='+${roles}}" class="waves-effect waves-dark"><i class="fa fa-star"></i>首页</a>
+                </li>
+
+                <li>
+                    <a id="userManage" th:unless="${roles} eq 'commonUser'" href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-user"></i>用户管理<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+
+                        <li>
+                            <a th:href="@{'/manageUser.do?roles='+${roles}}" >普通用户</a>
+                        </li>
+
+                        <li>
+                            <a th:if="${roles} eq 'sysAdmin'"  th:href="@{'/manageAdmin.do?roles='+${roles}}">普通管理员</a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-book"></i>所有笔记本<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a th:href="@{'/findAllNoteBooks.do?roles='+${roles}}">所有笔记本</a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                 <li>
+
+                    <a  href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-trash"></i>回收站<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                    <li>
+                        <a th:href="@{'/noteBookBack.do?roles='+${roles}}">笔记本回收</a>
+                    </li>
+
+                    <li>
+                        <a th:href="@{'/noteBack.do?roles='+${roles}}">笔记回收</a>
+                    </li>
+
+                </ul>
+                </li>
+
+                <li>
+                    <a href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-share"></i>收藏<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a th:href="@{'/collectNoteBook.do?roles='+${roles}}">收藏的笔记本</a>
+                        </li>
+
+                        <li>
+                            <a th:href="@{'/collectNote.do?roles='+${roles}}">收藏的笔记</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!--内容主体-->
+    <div id="page-wrapper">
+        <!--内容主题-->
+        <div class="header">
+            <h1 class="page-header">
+                系统简介
+            </h1>
+        </div>
+        <div id="page-inner">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">云笔记系统</span>
+                    <p>云笔记系统(Cloud Note),是一款用于用户方便在笔记本上记录笔记,以及对笔记和笔记本进行增删改查的一款功能，还有回收站功能以及收藏分享功能，非常适用于人们记录一些自己的计划或者其他的一些自己的心得,亦或者是一些学习笔记。</p>
+                </div>
+            </div>
+            <!--页脚-->
+            <br>
+            <br>
+            <br>
+            <footer><p class="text-center">Copyright &copy; 2019.</p></footer>
+        </div>
+    </div>
+</div>
+
+<!-- JS Scripts-->
+<!-- jQuery Js -->
+<script src="static/assets/js/jquery-1.10.2.js"></script>
+
+<!-- Bootstrap Js -->
+<script src="static/assets/js/bootstrap.min.js"></script>
+
+<script src="static/assets/materialize/js/materialize.min.js"></script>
+
+<!-- Metis Menu Js -->
+<script src="static/assets/js/jquery.metisMenu.js"></script>
+
+<script src="static/assets/js/easypiechart.js"></script>
+<script src="static/assets/js/easypiechart-data.js"></script>
+
+<script src="static/assets/js/Lightweight-Chart/jquery.chart.js"></script>
+
+<!-- Custom Js -->
+<script src="static/assets/js/custom-scripts.js"></script>
+
+
+</body>
+
+</html>

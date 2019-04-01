@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jingqi.dao.CollectDao">
+    <resultMap  id="collectNoteBookMap"               type="com.jingqi.domain.Collect">
+        <id     property="collectId"           column="collectId"/>
+        <result property="noteBookId"          column="noteBookId"/>
+        <result property="userId"              column="userId"/>
+        <result property="noteBookType"        column="noteBookType"/>
+        <result property="noteBookName"        column="noteBookName"/>
+        <result property="noteBookDescription" column="noteBookDescription"/>
+        <result property="creator"             column="creator"/>
+        <result property="createName"          column="createName"/>
+        <result property="createTime"          column="createTime"/>
+        <result property="updator"             column="updator"/>
+        <result property="updateName"          column="updateName"/>
+        <result property="updateTime"          column="updateTime"/>
+        <result property="noteBookStatus"      column="noteBookStatus"/>
+        <result property="collectStatus"       column="collectStatus"/>
+    </resultMap>
+
+
+    <resultMap  id="collectNoteMap"            type="com.jingqi.domain.Collect">
+        <id     property="collectId"           column="collectId"/>
+        <result property="noteId"              column="noteId"/>
+        <result property="userId"              column="userId"/>
+        <result property="noteStatus"          column="noteStatus"/>
+        <result property="notType"             column="notType"/>
+        <result property="noteTitle"           column="noteTitle"/>
+        <result property="noteBookTitle"       column="noteBookTitle"/>
+        <result property="noteBody"            column="noteBody"/>
+        <result property="creator"             column="creator"/>
+        <result property="createName"          column="createName"/>
+        <result property="createTime"          column="createTime"/>
+        <result property="updator"             column="updator"/>
+        <result property="updateName"          column="updateName"/>
+        <result property="updateTime"          column="updateTime"/>
+        <result property="collectStatus"       column="collectStatus"/>
+    </resultMap>
+
+    <!--新建一个笔记-->
+    <insert id="createCollectNote" parameterType="collect">
+        insert into collection(
+                             collectId,
+                             noteId,
+                             userId,
+                             noteStatus,
+                             noteType,
+                             noteTitle,
+                             noteBookTitle,
+                             noteBody,
+                             creator,
+                             createName,
+                             createTime,
+                             noteBookStatus,
+                             collectStatus)
+                            values(
+                            #{collectId},
+                            #{noteId},
+                            #{userId},
+                            #{noteStatus},
+                            #{noteType},
+                            #{noteTitle},
+                            #{noteBookTitle},
+                            #{noteBody},
+                            #{creator},
+                            #{createName},
+                            #{createTime},
+                            #{noteBookStatus},
+                            #{collectStatus}
+                            )
+    </insert>
+
+    <!--新建一个笔记本-->
+    <insert id="createCollect" parameterType="collect">
+        insert into collection(
+                             collectId,
+                             noteBookId,
+                             userId,
+                             noteBookType,
+                             noteBookName,
+                             noteBookDescription,
+                             creator,
+                             createName,
+                             createTime,
+                             collectStatus
+                            )
+                            values(
+                            #{collectId},
+                            #{noteBookId},
+                            #{userId},
+                            #{noteBookType},
+                            #{noteBookName},
+                            #{noteBookDescription},
+                            #{creator},
+                            #{createName},
+                            #{createTime},
+                            #{collectStatus}
+                            )
+    </insert>
+
+
+    <select id="findCollectCount" parameterType="String" resultType="int">
+        select count(*) from collection
+        <where>
+            <if test="userId != '' and userId != null and userId != 'null'">
+                userId = #{userId}
+            </if>
+            and collectStatus = "0"
+        </where>
+
+    </select>
+
+    <select id="findCollectNoteCount" parameterType="String" resultType="int">
+        select count(*) from collection
+        <where>
+            <if test="userId != '' and userId != null and userId != 'null'">
+                userId = #{userId}
+            </if>
+            and collectStatus = "1"
+        </where>
+
+    </select>
+
+    <select id="findAllCollect" resultMap="collectNoteBookMap">
+        select * from collection
+        <where>
+            <if test="userId != '' and userId != null and userId != 'null'">
+                userId = #{userId}
+            </if>
+            and collectStatus = "0"
+        </where>
+        limit #{begin},#{pageSize}
+    </select>
+
+    <select id="findAllCollectNote" resultMap="collectNoteMap">
+        select * from collection
+        <where>
+            <if test="userId != '' and userId != null and userId != 'null'">
+                userId = #{userId}
+            </if>
+            and collectStatus = "1"
+        </where>
+       limit #{begin},#{pageSize}
+    </select>
+
+    <delete id="deleteCollect" parameterType="String">
+        delete from collection where collectId = #{collectId}
+    </delete>
+
+    <select id="lookBookNote" parameterType="String" resultType="collect">
+        select * from collection where collectId = #{collectId}
+    </select>
+</mapper>

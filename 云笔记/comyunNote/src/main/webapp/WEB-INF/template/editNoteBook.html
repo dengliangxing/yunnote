@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>云笔记系统</title>
+    <!--需要联网-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <link rel="stylesheet" href="static/assets/materialize/css/materialize.min.css" media="screen,projection"/>
+    <!-- Bootstrap Styles-->
+    <link href="static/assets/css/bootstrap.css" rel="stylesheet"/>
+    <!-- FontAwesome Styles-->
+    <link href="static/assets/css/font-awesome.css" rel="stylesheet"/>
+    <!-- Morris Chart Styles-->
+    <link href="static/assets/js/morris/morris-0.4.3.min.css" rel="stylesheet"/>
+    <!-- Custom Styles-->
+    <link href="static/assets/css/custom-styles.css" rel="stylesheet"/>
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
+    <link rel="stylesheet" href="/static/assets/js/Lightweight-Chart/cssCharts.css">
+</head>
+
+<body>
+
+<div id="wrapper">
+
+    <div id="page-inner">
+        <!--自定义内容-->
+        <div class="card">
+            <div class="card-content">
+
+                <form  data-isrefsh="true" id="pageform">
+                    <div style="margin:15px auto 0;">
+                        <fieldset>
+                            <legend>
+                                <h3 class="listtitle">云笔记</h3>
+                                <input type="hidden" id="iId" name="id" th:value="${noteBook.id}"/>
+                            </legend>
+                            <table class="table table-condensed" width="100%">
+                                <tbody>
+                                <tr>
+                                    <td class="right" style="white-space: nowrap"><span style="color:red">*</span>笔记本类型:</td>
+                                    <td class="left" colspan="3">
+                                        <input id="noteBookType" name="noteBookType" type="text"
+                                               th:value="${noteBook.noteBookType}"  size="15" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="right" style="white-space: nowrap"><span style="color:red">*</span>笔记本名称:</td>
+                                    <td class="left" colspan="3">
+                                        <input id="noteBookName" name="noteBookName" type="text"
+                                               th:value="${noteBook.noteBookName}"  size="15" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="right" style="white-space: nowrap"><span style="color:red">*</span>笔记本描述:</td>
+                                    <td class="left" colspan="3">
+                                        <input id="noteBookDescription" name="noteBookDescription" type="text"
+                                               th:value="${noteBook.noteBookDescription}"  size="15" />
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                            </table>
+                        </fieldset>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="updateCustomer()">保存修改</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- JS Scripts-->
+<!-- jQuery Js -->
+<script src="static/assets/js/jquery-1.10.2.js"></script>
+
+<!-- Bootstrap Js -->
+<script src="static/assets/js/bootstrap.min.js"></script>
+
+<script src="static/assets/materialize/js/materialize.min.js"></script>
+
+<!-- Metis Menu Js -->
+<script src="static/assets/js/jquery.metisMenu.js"></script>
+
+<script src="static/assets/js/easypiechart.js"></script>
+<script src="static/assets/js/easypiechart-data.js"></script>
+
+<script src="static/assets/js/Lightweight-Chart/jquery.chart.js"></script>
+
+<!-- Custom Js -->
+<script src="static/assets/js/custom-scripts.js"></script>
+
+
+</body>
+
+</html>

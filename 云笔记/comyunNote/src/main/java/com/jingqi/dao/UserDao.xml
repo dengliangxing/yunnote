@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jingqi.dao.UserDao">
+
+    <resultMap id="userMap" type="com.jingqi.domain.User">
+        <id property="userId"    column="userId"/>
+        <result property="userName"  column="userName"/>
+        <result property="userPassword" column="userPassword"/>
+        <result property="roleId"       column="roleId"/>
+        <result property="creator"      column="creator"/>
+        <result property="createName"   column="createName"/>
+        <result property="createTime"   column="createTime"/>
+        <result property="updator"      column="updator"/>
+        <result property="updateName"   column="updateName"/>
+        <result property="updateTime"   column="updateTime"/>
+    </resultMap>
+
+
+    <select id="findByName" parameterType="String" resultType="user">
+        select * from user where userName = #{name}
+    </select>
+
+    <select id="findById" parameterType="String" resultType="User">
+        select * from user where userId = #{id}
+    </select>
+
+    <insert id="save" parameterType="user">
+        insert into user (
+        userId,
+        userName,
+        userPassword,
+        userNick,
+        roleId,
+        creator,
+        createName,
+        createTime)
+        values (
+         #{userId},
+         #{userName},
+         #{userPassword},
+         #{userNick},
+         #{roleId},
+         #{creator},
+         #{createName},
+         #{createTime})
+    </insert>
+
+    <select id="selectById" parameterType="String" resultType="user">
+        select * from user where userId = #{userId}
+    </select>
+
+    <update id="update" parameterType="user">
+        update user
+        <set>
+
+            <if test="userName != null">
+                userName=#{userName},
+            </if>
+
+
+            <if test="userPassword != null">
+                userPassword=#{userPassword},
+            </if>
+
+            <if test="updator != null">
+                updator=#{updator},
+            </if>
+
+            <if test="updateName != null">
+                updateName=#{updateName},
+            </if>
+
+            <if test="updateTime != null">
+                updateTime=#{updateTime}
+            </if>
+
+        </set>
+        where userId = #{userId}
+    </update>
+
+    <select id="findByRole" parameterType="String" resultType="role">
+        select r.* from role r,user u where u.userName=#{userName} and u.roleId = r.roleId
+    </select>
+
+    <select id="findAllUser" resultMap="userMap">
+        select * from user
+        <where>
+            <if test="userName != '' and userName != null and userName != 'null'">
+                userName LIKE "%"#{userName}"%"
+            </if>
+            AND roleId = #{roleId}
+        </where>
+        limit #{begin},#{pageSize}
+    </select>
+
+    <select id="findAllUserCount" resultType="int">
+        select count(*) from user
+        <where>
+            <if test="userName != '' and userName != null and userName != 'null'">
+                userName LIKE "%"#{userName}"%"
+            </if>
+          AND roleId = #{roleId}
+        </where>
+
+    </select>
+
+    <select id="findByUserId" parameterType="String" resultType="user">
+        select * from user where userId = #{userId}
+    </select>
+
+    <delete id="deleteUser" parameterType="String">
+        delete from user where userId = #{userId}
+    </delete>
+</mapper>

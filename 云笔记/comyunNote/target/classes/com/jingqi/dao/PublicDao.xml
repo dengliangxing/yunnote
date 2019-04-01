@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jingqi.dao.PublicDao">
+
+    <resultMap id="publicMap" type="com.jingqi.domain.Public">
+        <id property="publicId"    column="publicId"/>
+        <result property="noteId"  column="noteId"/>
+        <result property="noteName"  column="noteName"/>
+        <result property="noteBody" column="noteBody"/>
+        <result property="creator"             column="creator"/>
+        <result property="createName"          column="createName"/>
+        <result property="createTime"          column="createTime"/>
+        <result property="updator"             column="updator"/>
+        <result property="updateName"          column="updateName"/>
+        <result property="updateTime"          column="updateTime"/>
+    </resultMap>
+
+    <select id="findByPublicId" parameterType="String" resultType="Public">
+        select * from public where publicId = #{id}
+    </select>
+
+    <select id="findCount" resultType="int">
+        select count(*) from public where isPublic="1"
+    </select>
+
+    <select id="findAllPublic" resultMap="publicMap">
+        select * from public  where isPublic="1" limit #{begin},#{pageSize}
+    </select>
+
+    <select id="findByPublicNoteId" parameterType="String" resultMap="publicMap">
+        select * from public where noteId=#{noteId}
+    </select>
+
+    <!--新增一个公开的笔记-->
+    <insert id="addPublicNote" parameterType="public">
+        insert into public(
+                             publicId,
+                             noteId,
+                             noteName,
+                             noteBody,
+                             isPublic,
+                             creator,
+                             createName,
+                             createTime
+                            )
+                            values(
+                            #{publicId},
+                            #{noteId},
+                            #{noteName},
+                            #{noteBody},
+                            #{isPublic},
+                            #{creator},
+                            #{createName},
+                            #{createTime}
+                            )
+
+    </insert>
+
+    <delete id="deletePublicNote" parameterType="String">
+        delete from public where publicId = #{id}
+    </delete>
+
+    <delete id="deleteByNoteId" parameterType="String">
+        delete from public where noteId = #{noteId}
+    </delete>
+</mapper>

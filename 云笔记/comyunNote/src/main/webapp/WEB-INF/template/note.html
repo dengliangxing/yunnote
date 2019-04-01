@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>云笔记系统</title>
+    <!--需要联网-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <link rel="stylesheet" href="static/assets/materialize/css/materialize.min.css" media="screen,projection"/>
+    <!-- Bootstrap Styles-->
+    <link href="static/assets/css/bootstrap.css" rel="stylesheet"/>
+    <!-- FontAwesome Styles-->
+    <link href="static/assets/css/font-awesome.css" rel="stylesheet"/>
+    <!-- Morris Chart Styles-->
+    <link href="static/assets/js/morris/morris-0.4.3.min.css" rel="stylesheet"/>
+    <!-- Custom Styles-->
+    <link href="static/assets/css/custom-styles.css" rel="stylesheet"/>
+    <link href="static/assets/js/dataTables/dataTables.bootstrap.css" rel="stylesheet"/>
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
+    <link rel="stylesheet" href="/static/assets/js/Lightweight-Chart/cssCharts.css">
+</head>
+
+<body>
+
+<div id="wrapper">
+    <nav class="navbar navbar-default top-navbar" role="navigation">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle waves-effect waves-dark" data-toggle="collapse"
+                    data-target=".sidebar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand waves-effect waves-yellow"><i
+                    class="large material-icons">insert_chart</i>
+                <strong>云笔记系统</strong></a>
+
+            <div id="sideNav" href=""><i class="material-icons dp48">toc</i></div>
+        </div>
+        <!--用户登录信息-->
+        <ul class="nav navbar-top-links navbar-right">
+            <li><a class="dropdown-button waves-effect waves-dark" href="#" data-activates="dropdown1"><i
+                    class="fa fa-user fa-fw"></i> <b th:unless="${session.SESSION == null}" th:text="${session.SESSION.userName}"></b> <i
+                    class="material-icons right">arrow_drop_down</i></a></li>
+        </ul>
+    </nav>
+    <!--用户登录栏的具体信息-->
+    <ul id="dropdown1" class="dropdown-content">
+        <li><a th:href="@{/myAccount.do}"><i class="fa fa-user fa-fw"></i>我的账户</a>
+        </li>
+        <li><a th:href="@{/logout.do}"><i class="fa fa-sign-out fa-fw"></i>退出登录</a>
+        </li>
+    </ul>
+    <!--侧边栏-->
+    <nav class="navbar-default navbar-side" role="navigation">
+        <div class="sidebar-collapse">
+            <ul class="nav" id="main-menu">
+                <input hidden="hidden" name="flag" id="flag" th:value="${flag}"/>
+
+                <li>
+                    <a th:href="@{'/head.do?roles='+${roles}}" class="waves-effect waves-dark"><i class="fa fa-star"></i>首页</a>
+                </li>
+
+                <li>
+                    <a id="aaa" th:unless="${roles} eq 'commonUser'" href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-user"></i>用户管理<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a th:href="@{'/manageUser.do?roles='+${roles}}">普通用户</a>
+                        </li>
+
+                        <li>
+                            <a th:if="${roles} eq 'sysAdmin'" th:href="@{'/manageAdmin.do?roles='+${roles}}">普通管理员</a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li>
+                    <a id="bbb" href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-book"></i>所有笔记本<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a th:href="@{'/findAllNoteBooks.do?roles='+${roles}}">所有笔记本</a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li>
+                    <a id="ccc"  href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-trash"></i>回收站<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a th:href="@{'/noteBookBack.do?roles='+${roles}}">笔记本回收</a>
+                        </li>
+
+                        <li>
+                            <a th:href="@{'/noteBack.do?roles='+${roles}}">笔记回收</a>
+                        </li>
+
+                    </ul>
+
+                </li>
+
+                <li>
+                    <a id="ddd" href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-share"></i>收藏<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a th:href="@{'/collectNoteBook.do?roles='+${roles}}">收藏的笔记本</a>
+                        </li>
+
+                        <li>
+                            <a th:href="@{'/collectNote.do?roles='+${roles}}">收藏的笔记</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+        </div>
+
+    </nav>
+    <!--内容主体-->
+    <div id="page-wrapper">
+        <!--内容主题-->
+        <div class="header">
+            <h1 class="page-header">
+                所有笔记
+            </h1>
+        </div>
+        <div id="page-inner">
+            <!--自定义内容-->
+            <div class="card">
+                <div class="card-content">
+                    <div class="table-responsive">
+                        <div id="dataTables-example_wrapper" class="dataTables_wrapper form-inline" role="grid">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <form  th:action="@{/includeBookNote.do}" method="get" >
+                                        <input type="hidden" name="noteBookId" id="noteBookId" th:value="${noteBookId}">
+                                        <input type="hidden" name="roles" id="roles" th:value="${roles}">
+                                        &nbsp;
+                                        <label for="noteType" style="font-size:13px;">笔记类型:</label>
+                                        <input type="text" class="form-control" id="noteType" name="noteType" th:value="${noteType}">
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <label for="noteTitle" style="font-size: 13px">笔记标题:</label>
+                                        <input type="text" class="form-control" id="noteTitle" name="noteTitle" th:value="${noteTitle}">
+                                        &nbsp;&nbsp;<button id="searchNote" type="submit" class="btn btn-success">查询</button>&nbsp;&nbsp;
+                                        <button type="reset" class="btn-primary btn" onclick="resetNote();">重置</button>
+                                    </form>
+
+                                </div>
+                            </div>
+
+                            <div>
+                                <a th:unless="${collect} eq 'collect'" href="#" class="btn btn-primary" data-toggle="modal"
+                                   data-target="#newNoteDialog" onclick="clearNote()">新建</a>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="panel panel-warning">
+                                        <div class="panel-heading">笔记信息列表</div>
+                                        <table data-width="100%" data-nowrap="true" data-selected-multi="false"
+                                               class="table table-bordered table-hover table-striped table-top"
+                                               data-toggle="tablefixed">
+                                            <thead>
+                                            <tr>
+                                                <th th:width="10"  th:class="center" th:hidden="hidden">笔记唯一id</th>
+                                                <th th:width="10"  th:class="center" th:hidden="hidden">笔记公开状态</th>
+                                                <th th:width="100" th:class="center">笔记类型</th>
+                                                <th th:width="100" th:class="center">笔记标题</th>
+                                                <th th:width="100" th:class="center">所属笔记本</th>
+                                                <th th:width="150" th:class="center">操作</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="tableContent">
+                                            <tr th:each="note:${note}">
+                                                <td class="center" th:text="${note.noteId}" th:hidden="hidden"></td>
+                                                <td class="center" th:text="${note.isPublic}" th:hidden="hidden"></td>
+                                                <td class="center" th:text="${note.noteType}"></td>
+                                                <td class="center" th:text="${note.noteTitle}"></td>
+                                                <td class="center" th:text="${noteBookTitle}"></td>
+                                                <td class="center"><a th:unless="${collect} eq 'collect'" class="btn btn-primary" data-toggle="modal"
+                                                                       data-target="#editNoteDialog" th:onclick="'javascript:editNote(\''+${note.noteId}+'\')'">修改</a>&nbsp;&nbsp;
+                                                    <a th:unless="${collect} eq 'collect'"  class="btn-danger btn"  th:onclick="'javascript:recycleNote(\''+${note.noteId}+'\')'">回收站</a>&nbsp;&nbsp;
+                                                    <a class="btn btn-success" data-toggle="modal" data-target="#viewNoteDialog" th:onclick="'javascript:lookNote(\''+${note.noteId}+'\')'">查看</a>&nbsp;&nbsp;
+                                                    <a th:unless="${collect} eq 'collect'" class="btn btn-info"     th:onclick="'javascript:collectOneNote(\''+${note.noteId}+'\')'">收藏</a>
+                                                    <a th:if="${collect} eq 'collect'"class="btn-danger btn"  th:onclick="'javascript:deleteCollectNote(\''+${note.noteId}+'\')'">删除</a>
+                                                    <a th:unless="${collect} eq 'collect'"  class="btn btn-info"     th:onclick="'javascript:publicNote(\''+${note.noteId}+'\')'">公开笔记</a>
+                                                    <a th:unless="${collect} eq 'collect'"  class="btn-danger btn"   th:onclick="'javascript:CancelNote(\''+${note.noteId}+'\')'">取消公开</a>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="newNoteDialog" tabindex="-1" role="dialog"
+                                 aria-labelledby="myModalLabel">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <h4 class="modal-title" id="myNoteModalLabel">新建笔记</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form class="form-horizontal" id="new_note_form">
+                                                <div class="form-group">
+                                                    <label style="font-size:13px" for="noteType">笔记类型:&nbsp;&nbsp;&nbsp;</label>
+
+                                                        <input  type="text" class="form-control" id="new_noteType" placeholder="笔记类型" name="noteType"/>
+
+                                                </div>
+                                                <br>
+
+                                                <div class="form-group">
+                                                    <label style="font-size:13px">笔记标题:&nbsp;&nbsp;&nbsp;</label>
+
+                                                        <input type="text" class="form-control" id="new_noteTitle" placeholder="笔记标题" name="noteTitle" />
+                                                        <div class="warning" id="noteTitlespan"></div>
+                                                    </div>
+
+                                                <br>
+
+
+
+                                                <div class="form-group">
+                                                    <label style="font-size:13px">笔记内容:&nbsp;&nbsp;&nbsp;</label>
+                                                    <br>
+
+                                                        <textarea style="width: 550px;height: 150px " id="new_noteBody"placeholder="笔记内容" name="noteBody"></textarea>
+
+                                                </div>
+
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                            <button type="button" class="btn btn-primary" onclick="createNote()">新建笔记</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- 修改笔记模态框 -->
+                            <div class="modal fade" id="editNoteDialog" tabindex="-1" role="dialog"
+                                 aria-labelledby="myModalLabel">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <h4 class="modal-title" id="myModalLabel">修改笔记信息</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form class="form-horizontal" id="edit_note_form">
+                                                <input type="hidden" id="edit_noteId" name="noteId"/>
+                                                <div class="form-group">
+                                                    <label style="font-size:13px" for="noteType">笔记类型:&nbsp;&nbsp;&nbsp;</label>
+
+                                                        <input  type="text" class="form-control" id="edit_noteType" placeholder="笔记类型" name="noteType" />
+
+                                                </div>
+                                                <br>
+
+                                                <div class="form-group">
+                                                    <label style="font-size:13px">笔记标题:&nbsp;&nbsp;&nbsp;</label>
+
+                                                        <input type="text" class="form-control" id="edit_noteTitle" placeholder="笔记标题" name="noteTitle" />
+
+                                                </div>
+                                                <br>
+                                                <div class="form-group">
+                                                    <label style="font-size:13px">笔记内容:&nbsp;&nbsp;&nbsp;</label>
+                                                    <br>
+
+                                                        <textarea style="width: 550px;height: 150px " id="edit_noteBody"placeholder="笔记内容" name="noteBody"></textarea>
+
+                                                </div>
+                                            </form>
+
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                            <button type="button" class="btn btn-primary" onclick="updateNote()">保存修改</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 查看笔记模态框 -->
+                            <div class="modal fade" id="viewNoteDialog" tabindex="-1" role="dialog"
+                                 aria-labelledby="myModalLabel">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <h4 class="modal-title" id="myModalLabel">查看笔记信息</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form class="form-horizontal" id="view_note_form">
+                                                <input type="hidden" id="view_noteId" name="noteId"/>
+                                                <div class="form-group">
+                                                    <label style="font-size:13px" for="noteType">笔记类型:&nbsp;&nbsp;&nbsp;</label>
+
+                                                        <input  type="text" class="form-control" id="view_noteType" placeholder="笔记类型" name="noteType" th:value="${noteType}" readonly="readonly" />
+
+                                                </div>
+                                                <br>
+
+                                                <div class="form-group">
+                                                    <label style="font-size:13px">笔记标题:&nbsp;&nbsp;&nbsp;</label>
+
+                                                        <input type="text" class="form-control" id="view_noteTitle" placeholder="笔记标题" name="noteTitle" th:value="${noteTitle}" readonly="readonly" />
+
+                                                </div>
+                                                <br>
+                                                <div class="form-group">
+                                                    <label style="font-size:13px">笔记内容:&nbsp;&nbsp;&nbsp;</label>
+                                                    <br>
+
+                                                        <textarea style="width: 550px;height: 150px " id="view_noteBody"placeholder="笔记内容" name="noteBody" th:value="${noteBody}" readonly="readonly"></textarea>
+
+                                                </div>
+                                            </form>
+
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div aria-label="Page navigation example">
+                                <table class="pagination" id="page">
+                                    <tr>
+                                        <td><a th:href="@{'/includeBookNote.do?currentPage=1&noteBookId='+${noteBookId}+'&noteType='+${noteType}+'&noteTitle='+${noteTitle}+'&roles='+${roles}+'&collect='+${collect}+'&collectFlag='+${collectFlag}}">首页</a></td>
+                                        <td th:switch="${currentPage}">
+                                            <p th:case="1"><a th:href="@{'/includeBookNote.do?currentPage=1&noteBookId='+${noteBookId}+'&noteType='+${noteType}+'&noteTitle='+${noteTitle}+'&roles='+${roles}+'&collect='+${collect}+'&collectFlag='+${collectFlag}}">上一页</a></p>
+                                            <p th:case="*"><a th:href="@{'/includeBookNote.do?currentPage='+${currentPage-1}+'&noteBookId='+${noteBookId}+'&noteType='+${noteType}+'&noteTitle='+${noteTitle}+'&roles='+${roles}+'&collect='+${collect}+'&collectFlag='+${collectFlag}}">上一页</a></p> </td>
+                                            <!--<p th:case="*"><a th:href="@{/includeBookNote.do(currentPage=${currentPage-1})}">上一页</a></p> </td>-->
+                                        <td th:switch="${currentPage}">
+                                            <p th:case="${totalPage}"><a th:href="@{'/includeBookNote.do?currentPage='+${totalPage}+'&noteBookId='+${noteBookId}+'&noteType='+${noteType}+'&noteTitle='+${noteTitle}+'&roles='+${roles}+'&collect='+${collect}+'&collectFlag='+${collectFlag}}">下一页</a></p>
+                                            <p th:case="*"><a th:href="@{'/includeBookNote.do?currentPage='+${currentPage+1}+'&noteBookId='+${noteBookId}+'&noteType='+${noteType}+'&noteTitle='+${noteTitle}+'&roles='+${roles}+'&collect='+${collect}+'&collectFlag='+${collectFlag}}">下一页</a></p> </td>
+                                        <td><a th:href="@{'/includeBookNote.do?currentPage='+${totalPage}+'&noteBookId='+${noteBookId}+'&noteType='+${noteType}+'&noteTitle='+${noteTitle}+'&roles='+${roles}+'&collect='+${collect}+'&collectFlag='+${collectFlag}}">尾页</a></td>
+                                    </tr>
+                                </table>
+
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!--页脚-->
+            <br>
+            <br>
+            <br>
+            <footer><p class="text-center">Copyright &copy; 2019.</p></footer>
+        </div>
+    </div>
+</div>
+
+<!-- JS Scripts-->
+<!-- jQuery Js -->
+<script src="static/assets/js/jquery-1.10.2.js"></script>
+
+<!-- Bootstrap Js -->
+<script src="static/assets/js/bootstrap.min.js"></script>
+
+<script src="static/assets/materialize/js/materialize.min.js"></script>
+
+<!-- Metis Menu Js -->
+<script src="static/assets/js/jquery.metisMenu.js"></script>
+
+<script src="static/assets/js/easypiechart.js"></script>
+<script src="static/assets/js/easypiechart-data.js"></script>
+
+<script src="static/assets/js/Lightweight-Chart/jquery.chart.js"></script>
+<script src="static/assets/js/dataTables/dataTables.bootstrap.js"></script>
+<script src="static/assets/js/dataTables/jquery.dataTables.js"></script>
+<!-- Custom Js -->
+<script src="static/assets/js/custom-scripts.js"></script>
+
+<script src="static/assets/js/jquery-ui-1.11.2.min.js"></script>
+<script>
+    window.onload = function(){
+        debugger;
+        var flag = $("#flag").val();
+        if(flag == "1" || flag == "2") {
+            $("#aaa").click();
+        } else if(flag == "3") {
+            $("#bbb").click();
+        } else if(flag == "4" || flag == "5") {
+            $("#ccc").click();
+        } else if(flag == "6" || flag == "7" || flag == "8") {
+            $("#ddd").click();
+        }
+    }
+    /**
+     * 新增前清除input输入框里面的信息
+     * @author   Huxudong
+     * @date     2019-02-14
+     */
+    function clearNote() {
+        $("#new_noteType").val("");
+        $("#new_noteTitle").val("");
+        $("#new_noteBody").val("");
+
+    }
+
+    /**
+     * 新增一条笔记本的点击事件,通过ajax与后台交互数据
+     * @author     Huxudong
+     * @date       2019-02-14
+     */
+    function createNote() {
+        debugger;
+        var noteType = $("#new_noteType").val();
+        var noteTitle = $("#new_noteTitle").val();
+        var noteBody = $("#new_noteBody").val();
+        var noteBookId = $("#noteBookId").val();
+        $.ajax({
+            type : 'POST',
+            url : '/comyunNote/createNote.do',
+            data: {noteBookId:noteBookId,noteType:noteType,noteTitle:noteTitle,noteBody:noteBody},
+            success : function (data) {
+                if("OK" == data) {
+                    alert("笔记创建成功!");
+                    window.location.reload();
+                } else if("FAIL" == data) {
+                    alert("笔记创建失败!");
+                    window.location.reload();
+                } else if("NOT" == data) {
+                    alert("笔记标题称不能为空!");
+                    return ;
+                } else if("EXIT" == data) {
+                    alert("该笔记标题已经存在!");
+                    return ;
+                }
+            }
+        });
+    }
+
+    /**
+     * 将后台的数据映射到修改的页面中
+     * @author        Huxudong
+     * @date          2019-02-15
+     * @param id      修改笔记本时该数据的id
+     */
+    function editNote(id) {
+        $.ajax({
+            type : 'POST',
+            url : '/comyunNote/editNote.do',
+            data : {id:id},
+            success : function (data) {
+                    $("#edit_noteId").val(data.noteId);
+                    $("#edit_noteType").val(data.noteType);
+                    $("#edit_noteTitle").val(data.noteTitle);
+                    $("#edit_noteBody").val(data.noteBody);
+            }
+        });
+    }
+
+    /**
+     * 删除一条笔记
+     * @author       Huxudong
+     * @date         2019-02-16
+     * @param id     删除笔记本时该数据的id
+     */
+    function recycleNote(id) {
+        if(confirm('确定把给笔记移入回收站吗？')) {
+            $.ajax({
+                type : 'post',
+                url : '/comyunNote/recycleNote.do',
+                data : {id:id},
+                success : function (data) {
+                    if("OK" == data) {
+                        alert("移入回收成功成功!");
+                        window.location.reload();
+                    } else {
+                        alert("移入回收站失败!");
+                        window.location.reload();
+                    }
+                }
+            });
+        } else {
+            return ;
+        }
+    }
+
+    /**
+     * 修改笔记时保存数据通过ajax把数据传到后台进行交互
+     * @author     Huxudong
+     * @date       2019-02-16
+     */
+    function updateNote() {
+        debugger;
+        var noteId = $("#edit_noteId").val();
+        var noteType = $("#edit_noteType").val();
+        var noteTitle = $("#edit_noteTitle").val();
+        var noteBody = $("#edit_noteBody").val();
+        if(null == noteTitle || "" == noteTitle) {
+            alert("笔记标题不可以为空!");
+            return ;
+        }
+
+        $.ajax({
+            type: 'post',
+            url: '/comyunNote/saveNote.do',
+            data:{noteId:noteId,noteType:noteType,noteTitle:noteTitle,noteBody:noteBody},
+            success: function (data) {
+                if("EXIST" == data) {
+                    alert("该笔记名称已经存在!");
+                    return ;
+                } else if ("OK" == data) {
+                    alert("修改笔记成功!");
+                    window.location.reload();
+                } else if ("FAIL" == data) {
+                    alert("修改笔记失败!");
+                    window.location.reload()
+                }
+            }
+
+        });
+    }
+
+    /**
+     * 重置按钮功能
+     * @author  Huxudong
+     * @date    2019-02-16
+     */
+    function resetNote() {
+        debugger;
+        $("#noteType").val("");
+        $("#noteTitle").val("");
+        $("#searchNote").click();
+    }
+
+    /**
+     * 查看笔记
+     * @author  Huxudong
+     * @date    2019-02-16
+     */
+    function lookNote(id) {
+        $.ajax({
+            type : 'POST',
+            url : '/comyunNote/lookNote.do',
+            data : {id:id},
+            success : function (data) {
+                $("#view_noteId").val(data.noteId);
+                $("#view_noteType").val(data.noteType);
+                $("#view_noteTitle").val(data.noteTitle);
+                $("#view_noteBody").val(data.noteBody);
+            }
+        });
+    }
+
+    /**
+     * 收藏笔记
+     * @author  Huxudong
+     * @date    2019-02-16
+     */
+    function collectOneNote(id) {
+        if(confirm('确定要收藏该笔记吗?')) {
+            $.ajax({
+                type : 'post',
+                url : '/comyunNote/collectOneNote.do',
+                data : {id:id},
+                success : function (data) {
+                    if("OK" == data) {
+                        alert("收藏成功!");
+                        window.location.reload();
+                    } else {
+                        alert("收藏失败!");
+                        window.location.reload();
+                    }
+                }
+            });
+        } else {
+            return ;
+        }
+
+    }
+
+    /**
+     * 公开笔记
+     * @author  Huxudong
+     * @date    2019-03-30
+     */
+    function publicNote(id) {
+        if(confirm('公开此笔记，其他用户可以都查看该笔记，确定公开吗？')) {
+            $.ajax({
+                type : 'post',
+                url : '/comyunNote/publicNote.do',
+                data : {id:id},
+                success : function (data) {
+                    if("OK" == data) {
+                        alert("公开笔记成功!");
+
+                        window.location.reload();
+                    } else if("FAIL" == data) {
+                        alert("公开笔记失败!");
+                        window.location.reload();
+                    } else if("REPEAT" == data) {
+                        alert("该笔记已经被公开过了!");
+                        window.location.reload();
+                    }
+                }
+            });
+        } else {
+            return ;
+        }
+    }
+
+    /**
+     * 公开笔记
+     * @author  Huxudong
+     * @date    2019-03-30
+     */
+    function CancelNote(id) {
+        if(confirm('确定取消公开的笔记吗？')) {
+            $.ajax({
+                type : 'post',
+                url : '/comyunNote/CancelNote.do',
+                data : {id:id},
+                success : function (data) {
+                    if("OK" == data) {
+                        alert("取消公开笔记成功!");
+                        window.location.reload();
+                    } else if("FAIL" == data) {
+                        alert("取消公开笔记失败!");
+                        window.location.reload();
+                    } else if("NONE" == data) {
+                        alert("该笔记没有被公开，不可以取消!");
+                        window.location.reload();
+                    }
+                }
+            });
+        } else {
+            return ;
+        }
+    }
+
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+ body{
+     background: url("../img/index.jpg" ) no-repeat  ;
+     z-index: -1;
+     background-size:1550px 850px
+ }
+ #card{
+     background: #64ffda;
+     position:relative;
+     left:500px;
+ }
+#loginButton{
+     background: #33691e;
+}
+
+
+#registerButton{
+    background: #33691e;
+}

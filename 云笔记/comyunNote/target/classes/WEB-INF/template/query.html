@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>云笔记系统</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <link rel="stylesheet" href="static/assets/materialize/css/materialize.min.css" media="screen,projection"/>
+    <!-- Bootstrap Styles-->
+    <link href="static/assets/css/bootstrap.css" rel="stylesheet"/>
+    <!-- FontAwesome Styles-->
+    <link href="static/assets/css/font-awesome.css" rel="stylesheet"/>
+    <!-- Morris Chart Styles-->
+    <link href="static/assets/js/morris/morris-0.4.3.min.css" rel="stylesheet"/>
+    <!-- Custom Styles-->
+    <link href="static/assets/css/custom-styles.css" rel="stylesheet"/>
+    <link href="static/assets/js/dataTables/dataTables.bootstrap.css" rel="stylesheet"/>
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
+    <link rel="stylesheet" href="/static/assets/js/Lightweight-Chart/cssCharts.css">
+
+</head>
+
+<body>
+
+<div id="wrapper">
+    <nav class="navbar navbar-default top-navbar" role="navigation">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle waves-effect waves-dark" data-toggle="collapse"
+                    data-target=".sidebar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand waves-effect waves-yellow"><i
+                    class="large material-icons">insert_chart</i>
+                <strong>云笔记系统</strong></a>
+
+            <div id="sideNav" href=""><i class="material-icons dp48">toc</i></div>
+        </div>
+        <!--用户登录信息-->
+        <ul class="nav navbar-top-links navbar-right">
+            <li><a class="dropdown-button waves-effect waves-dark" href="#" data-activates="dropdown1"><i
+                    class="fa fa-user fa-fw"></i> <b th:unless="${session.SESSION == null}" th:text="${session.SESSION.userName}"></b> <i
+                    class="material-icons right">arrow_drop_down</i></a></li>
+        </ul>
+    </nav>
+    <!--用户登录栏的具体信息-->
+    <ul id="dropdown1" class="dropdown-content">
+        <li><a th:href="@{/myAccount.do}"><i class="fa fa-user fa-fw"></i>我的账户</a>
+        </li>
+        <li><a th:href="@{/logout.do}"><i class="fa fa-sign-out fa-fw"></i>退出登录</a>
+        </li>
+    </ul>
+    <!--侧边栏-->
+    <nav class="navbar-default navbar-side" role="navigation">
+        <div class="sidebar-collapse">
+            <ul class="nav" id="main-menu">
+                <input hidden="hidden" name="flag" id="flag" th:value="${flag}"/>
+
+                <li>
+                    <a th:href="@{'/head.do?roles='+${roles}}" class="waves-effect waves-dark"><i class="fa fa-star"></i>首页</a>
+                </li>
+
+
+                <li>
+                    <a id="aaa" th:unless="${roles} eq 'commonUser'" href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-user"></i>用户管理<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a th:href="@{'/manageUser.do?roles='+${roles}}">普通用户</a>
+                        </li>
+
+                        <li>
+                            <a th:if="${roles} eq 'sysAdmin'" th:href="@{'/manageAdmin.do?roles='+${roles}}">普通管理员</a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li>
+                    <a id="bbb" href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-book"></i>所有笔记本<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a th:href="@{'/findAllNoteBooks.do?roles='+${roles}}">所有笔记本</a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li>
+                    <a id="ccc"  href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-trash"></i>回收站<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a th:href="@{'/noteBookBack.do?roles='+${roles}}">笔记本回收</a>
+                        </li>
+
+                        <li>
+                            <a th:href="@{'/noteBack.do?roles='+${roles}}">笔记回收</a>
+                        </li>
+
+                    </ul>
+
+                </li>
+
+                <li>
+                    <a id="ddd" href="javascript:void(0)" class="waves-effect waves-dark"><i class="fa fa-share"></i>收藏<span
+                            class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level">
+                        <li>
+                            <a th:href="@{'/collectNoteBook.do?roles='+${roles}}">收藏的笔记本</a>
+                        </li>
+
+                        <li>
+                            <a th:href="@{'/collectNote.do?roles='+${roles}}">收藏的笔记</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+        </div>
+
+    </nav>
+    <!--内容主体-->
+    <div id="page-wrapper">
+        <!--内容主题-->
+        <div class="header">
+            <h1 class="page-header">
+                所有笔记本
+            </h1>
+        </div>
+        <div id="page-inner">
+            <!--自定义内容-->
+            <div class="card">
+                <div class="card-content">
+                    <div class="table-responsive">
+                        <div id="dataTables-example_wrapper" class="dataTables_wrapper form-inline" role="grid">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <form  th:action="@{/findAllNoteBooks.do}" method="get" >
+                                        <input hidden="hidden" id="roles" name="roles" th:value="${roles}"/>
+                                        &nbsp;
+                                        <label for="noteBookName" style="font-size:13px;">笔记本名称:</label>
+                                        <input type="text" class="form-control" id="noteBookName" name="noteBookName"  th:value="${noteBookName}">
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <label for="noteBookType" style="font-size: 13px">笔记本类型:</label>
+                                        <input type="text" class="form-control" id="noteBookType" name="noteBookType" th:value="${noteBookType}">
+                                        &nbsp;&nbsp;<button id="search" type="submit" class="btn btn-success">查询</button>&nbsp;&nbsp;
+                                        <button type="reset" class="btn-primary btn" onclick="resett();">重置</button>
+                                    </form>
+
+                                </div>
+                            </div>
+
+                            <div>
+                                <a href="#" class="btn btn-primary" data-toggle="modal"
+                                   data-target="#newCustomerDialog" onclick="clearCustomer()">新建</a>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="panel panel-warning">
+                                        <div class="panel-heading">笔记本信息列表</div>
+                                        <table data-width="100%" data-nowrap="true" data-selected-multi="false"
+                                               class="table table-bordered table-hover table-striped table-top"
+                                               data-toggle="tablefixed">
+                                            <thead>
+                                            <tr>
+                                                <th th:width="10"  th:class="center" th:hidden="hidden">笔记本id</th>
+                                                <th th:width="100" th:class="center">笔记本类型</th>
+                                                <th th:width="100" th:class="center">笔记本名称</th>
+                                                <th th:width="100" th:class="center">笔记本描述</th>
+                                                <th th:width="150" th:class="center">操作</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="tableContent">
+                                            <tr th:each="noteBook:${noteBook}">
+                                                <td class="center" th:hidden="hidden" th:text="${noteBook.noteBookId}"></td>
+                                                <td class="center" th:text="${noteBook.noteBookType}"></td>
+                                                <td class="center" th:text="${noteBook.noteBookName}"></td>
+                                                <td class="center" th:text="${noteBook.noteBookDescription}"></td>
+                                                <td class="center"><a  class="btn btn-primary" data-toggle="modal"
+                                                                       data-target="#editNoteBook" th:onclick="'javascript:editBook(\''+${noteBook.noteBookId}+'\')'">修改</a>&nbsp;&nbsp;
+                                                    <a  class="btn-danger btn"  th:onclick="'javascript:recycleNoteBook(\''+${noteBook.noteBookId}+'\')'">回收站</a>&nbsp;&nbsp;
+                                                    <a class="btn btn-success" th:href="@{'/includeBookNote.do?noteBookId='+${noteBook.noteBookId}+'&roles='+${roles}}">查看笔记</a>&nbsp;&nbsp;
+                                                    <a class="btn btn-info"     th:onclick="'javascript:collectOneNoteBook(\''+${noteBook.noteBookId}+'\')'">收藏</a>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="newCustomerDialog" tabindex="-1" role="dialog"
+                                 aria-labelledby="myModalLabel">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <h4 class="modal-title" id="myModalLabel">新建笔记本</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form class="form-horizontal" id="new_noteBook_form">
+                                                <div class="form-group">
+                                                    <label style="font-size:13px" for="noteBookType">笔记本类型:&nbsp;&nbsp;&nbsp;</label>
+                                                    <div class="col-sm-10">
+                                                        <input  type="text" class="form-control" id="new_noteBookType" placeholder="笔记本类型" name="noteBookType"/>
+                                                    </div>
+                                                </div>
+                                                <br>
+
+                                                <div class="form-group">
+                                                    <label style="font-size:13px">笔记本名称:&nbsp;&nbsp;&nbsp;</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="text" class="form-control" id="new_noteBookName" placeholder="笔记本名称" name="noteBookName" required/>
+                                                        <div class="warning" id="noteBookNamespan"></div>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div class="form-group">
+                                                    <label style="font-size:13px">笔记本描述:&nbsp;&nbsp;&nbsp;</label>
+                                                    <br>
+                                                    <div class="col-sm-10">
+                                                        <!--<input type="text" class="form-control" id="new_noteBookDescription" placeholder="笔记本描述" name="noteBookDescription" />-->
+                                                        <textarea style="width: 550px;height: 150px " id="new_noteBookDescription" placeholder="笔记本描述" name="noteBookDescription"></textarea>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                            <button type="button" class="btn btn-primary" onclick="createNoteBook()">新建笔记本</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- 修改笔记本模态框 -->
+                            <div class="modal fade" id="editNoteBook" tabindex="-1" role="dialog"
+                                 aria-labelledby="myModalLabel">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                            <h4 class="modal-title" id="myModalLabel">修改笔记本信息</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form class="form-horizontal" id="edit_noteBook_form">
+                                                <input type="hidden" id="edit_noteBookId" name="noteBookId"/>
+                                                <div class="form-group">
+                                                    <label style="font-size:13px" for="noteBookType">笔记本类型:&nbsp;&nbsp;&nbsp;</label>
+                                                    <div class="col-sm-10">
+                                                        <input  type="text" class="form-control" id="edit_noteBookType" placeholder="笔记本类型" name="noteBookType" />
+                                                    </div>
+                                                </div>
+                                                <br>
+
+                                                <div class="form-group">
+                                                    <label style="font-size:13px">笔记本名称:&nbsp;&nbsp;&nbsp;</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="text" class="form-control" id="edit_noteBookName" placeholder="笔记本名称" name="noteBookName" />
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div class="form-group">
+                                                    <label style="font-size:13px">笔记本描述:&nbsp;&nbsp;&nbsp;</label>
+                                                    <br>
+                                                    <div class="col-sm-10">
+                                                        <!--<input type="text" class="form-control" id="edit_noteBookDescription" placeholder="笔记本描述" name="noteBookDescription"/>-->
+                                                        <textarea style="width: 550px;height: 150px " id="edit_noteBookDescription" placeholder="笔记本描述" name="noteBookDescription"></textarea>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                                            <button type="button" class="btn btn-primary" onclick="updateCustomer()">保存修改</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div aria-label="Page navigation example">
+                                <table class="pagination" id="page">
+                                    <tr>
+                                        <td><a th:href="@{'/findAllNoteBooks.do?currentPage=1&noteBookName='+${noteBookName}+'&noteBookType='+${noteBookType}+'&roles='+${roles}}">首页</a></td>
+                                        <td th:switch="${currentPage}">
+                                            <p th:case="1"><a th:href="@{'/findAllNoteBooks.do?currentPage=1&noteBookName='+${noteBookName}+'&noteBookType='+${noteBookType}+'&roles='+${roles}}">上一页</a></p>
+                                            <p th:case="*"><a th:href="@{'/findAllNoteBooks.do?currentPage='+${currentPage-1}+'&noteBookName='+${noteBookName}+'&noteBookType='+${noteBookType}+'&roles='+${roles}}">上一页</a></p> </td>
+                                        <td th:switch="${currentPage}">
+                                            <p th:case="${totalPage}"><a th:href="@{'/findAllNoteBooks.do?currentPage='+${totalPage}+'&noteBookName='+${noteBookName}+'&noteBookType='+${noteBookType}+'&roles='+${roles}}">下一页</a></p>
+                                            <p th:case="*"><a th:href="@{'/findAllNoteBooks.do?currentPage='+${currentPage+1}+'&noteBookName='+${noteBookName}+'&noteBookType='+${noteBookType}+'&roles='+${roles}}">下一页</a></p> </td>
+                                        <td><a th:href="@{'/findAllNoteBooks.do?currentPage='+${totalPage}+'&noteBookName='+${noteBookName}+'&noteBookType='+${noteBookType}+'&roles='+${roles}}">尾页</a></td>
+                                    </tr>
+                                </table>
+
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!--页脚-->
+            <br>
+            <br>
+            <br>
+            <footer><p class="text-center">Copyright &copy; 2019.</p></footer>
+        </div>
+    </div>
+</div>
+
+<!-- JS Scripts-->
+<!-- jQuery Js -->
+<script src="static/assets/js/jquery-1.10.2.js"></script>
+
+<!-- Bootstrap Js -->
+<script src="static/assets/js/bootstrap.min.js"></script>
+
+<script src="static/assets/materialize/js/materialize.min.js"></script>
+
+<!-- Metis Menu Js -->
+<script src="static/assets/js/jquery.metisMenu.js"></script>
+
+<script src="static/assets/js/easypiechart.js"></script>
+<script src="static/assets/js/easypiechart-data.js"></script>
+
+<script src="static/assets/js/Lightweight-Chart/jquery.chart.js"></script>
+<script src="static/assets/js/dataTables/dataTables.bootstrap.js"></script>
+<script src="static/assets/js/dataTables/jquery.dataTables.js"></script>
+<!-- Custom Js -->
+<script src="static/assets/js/custom-scripts.js"></script>
+
+<script src="static/assets/js/jquery-ui-1.11.2.min.js"></script>
+<script>
+    window.onload = function(){
+        debugger;
+        var flag = $("#flag").val();
+        if(flag == "1" || flag == "2") {
+            $("#aaa").click();
+        } else if(flag == "3") {
+            $("#bbb").click();
+        } else if(flag == "4" || flag == "5") {
+            $("#ccc").click();
+        } else if(flag == "6" || flag == "7" || flag == "8") {
+            $("#ddd").click();
+        }
+    }
+    /**
+     * 新增前清除input输入框里面的信息
+     * @author   Huxudong
+     * @date     2019-02-14
+     */
+    function clearCustomer() {
+        $("#new_noteBookType").val("");
+        $("#new_noteBookName").val("");
+        $("#new_noteBookDescription").val("");
+
+    }
+
+    /**
+     * 新增一条笔记本的点击事件,通过ajax与后台交互数据
+     * @author     Huxudong
+     * @date       2019-02-14
+     *
+     */
+    function createNoteBook() {
+        var noteBookType = $("#new_noteBookType").val();
+        var noteBookName = $("#new_noteBookName").val();
+        var noteBookDescription = $("#new_noteBookDescription").val();
+        $.ajax({
+            type : 'POST',
+            url : '/comyunNote/createNoteBook.do',
+            data: {noteBookType:noteBookType,noteBookName:noteBookName,noteBookDescription:noteBookDescription},
+            success : function (data) {
+                if("OK" == data) {
+                    alert("笔记本创建成功!");
+                    window.location.reload();
+                } else if("FAIL" == data) {
+                    alert("笔记本创建失败!");
+                    window.location.reload();
+                } else if("NOT" == data) {
+                    alert("笔记本名称不能为空!");
+                    return ;
+                } else if("EXIT" == data) {
+                    alert("该笔记本名称已经存在!");
+                    return ;
+                }
+            }
+        });
+    }
+
+    /**
+     * 将后台的数据映射到修改的页面中
+     * @author        Huxudong
+     * @date          2019-02-15
+     * @param id      修改笔记本时该数据的id
+     */
+    function editBook(id) {
+        $.ajax({
+            type : 'POST',
+            url : '/comyunNote/editNoteBook.do',
+            data : {id:id},
+            success : function (data) {
+                $("#edit_noteBookId").val(data.noteBookId);
+                $("#edit_noteBookType").val(data.noteBookType);
+                $("#edit_noteBookName").val(data.noteBookName);
+                $("#edit_noteBookDescription").val(data.noteBookDescription);
+            }
+        });
+    }
+
+    /**
+     * 删除一条笔记本
+     * @author       Huxudong
+     * @date         2019-02-16
+     * @param id     删除笔记本时该数据的id
+     */
+    function recycleNoteBook(id) {
+        if(confirm('确定把该笔记本放入回收站吗？')) {
+            $.ajax({
+                type : 'post',
+                url : '/comyunNote/recycleNoteBook.do',
+                data : {id:id},
+                success : function (data) {
+                    if("OK" == data) {
+                        alert("放入回收站成功!");
+                        window.location.reload();
+                    } else {
+                        alert("放入回收站失败!");
+                        window.location.reload();
+                    }
+                }
+            });
+        } else {
+            return ;
+        }
+    }
+
+    /**
+     * 修改笔记本时保存数据通过ajax把数据传到后台进行交互
+     * @author     Huxudong
+     * @date       2019-02-16
+     */
+    function updateCustomer() {
+        debugger;
+        var noteBookId = $("#edit_noteBookId").val();
+        var noteBookType = $("#edit_noteBookType").val();
+        var noteBookName = $("#edit_noteBookName").val();
+        var noteBookDescription = $("#edit_noteBookDescription").val();
+        if(null == noteBookName || "" == noteBookName) {
+            alert("笔记本名称不可以为空!");
+            return ;
+        }
+
+        $.ajax({
+            type: 'post',
+            url: '/comyunNote/save.do',
+            data:{noteBookId:noteBookId,noteBookType:noteBookType,noteBookName:noteBookName,noteBookDescription:noteBookDescription},
+            success: function (data) {
+                if("EXIST" == data) {
+                    alert("该笔记本名称已经存在!");
+                    return ;
+                } else if ("OK" == data) {
+                    alert("修改笔记本成功!");
+                    window.location.reload();
+                } else if ("FAIL" == data) {
+                    alert("修改笔记本失败!");
+                    window.location.reload()
+                }
+            }
+
+        });
+    }
+
+    /**
+     * 重置按钮功能
+     * @author  Huxudong
+     * @date    2019-02-16
+     */
+    function resett() {
+        debugger;
+        $("#noteBookName").val("");
+        $("#noteBookType").val("");
+        $("#search").click();
+    }
+
+    function collectOneNoteBook(id) {
+        if(confirm('确定要收藏该笔记本吗?')) {
+            $.ajax({
+                type : 'post',
+                url  : '/comyunNote/collectOneNoteBook.do',
+                data : {id:id},
+                success : function (data) {
+                    if("OK" == data) {
+                        alert("笔记本收藏成功!");
+                        window.location.reload();
+                    } else {
+                        alert("笔记本收藏失败!");
+                        window.location.reload();
+                    }
+                }
+            });
+        } else {
+            return ;
+        }
+
+    }
+
+</script>
+
+</body>
+
+</html>

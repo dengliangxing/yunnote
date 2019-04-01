@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jingqi.dao.NoteDao">
+    <resultMap  id="noteMap"                   type="com.jingqi.domain.Note">
+        <id     property="noteId"              column="noteId"/>
+        <result property="noteBookId"          column="noteBookId"/>
+        <result property="userId"              column="userId"/>
+        <result property="noteStatusId"        column="noteStatusId"/>
+        <result property="noteStatus"          column="noteStatus"/>
+        <result property="noteTypeId"          column="noteTypeId"/>
+        <result property="noteType"            column="noteType"/>
+        <result property="noteTitle"           column="noteTitle"/>
+        <result property="noteBody"            column="noteBody"/>
+        <result property="isPublic"            column="isPublic"/>
+        <result property="creator"             column="creator"/>
+        <result property="createName"          column="createName"/>
+        <result property="createTime"          column="createTime"/>
+        <result property="updator"             column="updator"/>
+        <result property="updateName"          column="updateName"/>
+        <result property="updateTime"          column="updateTime"/>
+    </resultMap>
+
+    <!--查询所有的笔记-->
+    <select id="findAllNote" resultMap="noteMap">
+        select * from note
+        <where>
+            <if test="noteType != '' and noteType != null and noteType != 'null'">
+                noteType LIKE "%"#{noteType}"%"
+            </if>
+
+            <if test="noteTitle != '' and noteTitle != null and noteTitle != 'null'">
+                AND  noteTitle LIKE "%"#{noteTitle}"%"
+            </if>
+
+            <if test="noteBookId != '' and noteBookId != null">
+                AND noteBookId = #{noteBookId}
+            </if>
+
+            <if test="userId != '' and userId != null">
+                AND userId = #{userId}
+            </if>
+            AND noteStatus = "1"
+        </where>
+        limit #{begin},#{pageSize}
+    </select>
+
+    <!--查询所有的回收站笔记-->
+    <select id="findAllNoteBack" resultMap="noteMap">
+        select * from note
+        <where>
+            <if test="noteType != '' and noteType != null">
+                noteType LIKE "%"#{noteType}"%"
+            </if>
+
+            <if test="noteTitle != '' and noteTitle != null">
+                AND  noteTitle LIKE "%"#{noteTitle}"%"
+            </if>
+
+            <if test="updator != '' and updator != null">
+                AND  updator LIKE "%"#{updator}"%"
+            </if>
+
+            <if test="userId != '' and userId != null">
+                AND userId = #{userId}
+            </if>
+            AND noteStatus = "0"
+        </where>
+        limit #{begin},#{pageSize}
+    </select>
+
+    <!--查询笔记的总数-->
+    <select id="findNoteCount" resultType="int">
+        select count(*) from note
+        <where>
+            <if test="noteType != '' and noteType != null and noteType != 'null'">
+                noteType LIKE "%"#{noteType}"%"
+            </if>
+
+            <if test="noteTitle != '' and noteTitle != null and noteTitle != 'null'">
+                AND  noteTitle LIKE "%"#{noteTitle}"%"
+            </if>
+
+            <if test="noteBookId != '' and noteBookId != null">
+                AND noteBookId = #{noteBookId}
+            </if>
+
+            <if test="userId != '' and userId != null">
+                AND userId = #{userId}
+            </if>
+            AND noteStatus = "1"
+        </where>
+    </select>
+
+    <!--查询回收站笔记的总数-->
+    <select id="findNoteCountBack" resultType="int">
+        select count(*) from note
+        <where>
+            <if test="noteType != '' and noteType != null ">
+                noteType LIKE "%"#{noteType}"%"
+            </if>
+
+            <if test="noteTitle != '' and noteTitle != null ">
+                AND  noteTitle LIKE "%"#{noteTitle}"%"
+            </if>
+
+            <if test="updator != '' and updator != null">
+                AND  updator LIKE "%"#{updator}"%"
+            </if>
+
+            <if test="userId != '' and userId != null">
+                AND userId = #{userId}
+            </if>
+            AND noteStatus = "0"
+        </where>
+    </select>
+
+
+    <!--新建一个笔记-->
+    <insert id="createNote" parameterType="note">
+        insert into note(
+                             noteId,
+                             noteBookId,
+                             userId,
+                             noteStatus,
+                             noteType,
+                             noteTitle,
+                             noteBookTitle,
+                             noteBody,
+                             isPublic,
+                             creator,
+                             createName,
+                             createTime)
+                            values(
+                            #{noteId},
+                            #{noteBookId},
+                            #{userId},
+                            #{noteStatus},
+                            #{noteType},
+                            #{noteTitle},
+                            #{noteBookTitle},
+                            #{isPublic},
+                            #{noteBody},
+                            #{creator},
+                            #{createName},
+                            #{createTime}
+                            )
+    </insert>
+
+    <!--根据笔记的id查询该笔记本-->
+    <select id="findByNoteId" parameterType="String" resultType="note">
+        select * from note where noteId = #{id}
+    </select>
+
+    <!--根据笔记标题查询该笔记-->
+    <select id="findByNoteTitle" parameterType="String" resultType="note">
+        select * from note where noteTitle = #{noteTitle} AND noteStatus = "1"
+    </select>
+
+    <update id="updateNote" parameterType="note" >
+        update note
+        <set>
+            <if test="noteType != null">
+                noteType = #{noteType},
+            </if>
+
+            <if test="noteTitle != null">
+                noteTitle = #{noteTitle},
+            </if>
+
+            <if test="noteBody != null">
+                noteBody = #{noteBody},
+            </if>
+
+            <if test="updator != null">
+                updator = #{updator},
+            </if>
+
+            <if test="updateName != null">
+                updateName = #{updateName},
+            </if>
+
+            <if test="updateTime != null">
+                updateTime = #{updateTime}
+            </if>
+
+        </set>
+        where noteId = #{noteId}
+    </update>
+    <!--根据该笔记的id删除该笔记本-->
+    <delete id="deleteNote" parameterType="String">
+        delete from note where noteId = #{id}
+    </delete>
+
+    <update id="recycleNote" parameterType="note">
+        update note
+        <set>
+            <if test="noteStatus != null">
+                noteStatus = #{noteStatus},
+            </if>
+
+            <if test="updator != null">
+                updator = #{updator},
+            </if>
+
+            <if test="updateName != null">
+                updateName = #{updateName},
+            </if>
+
+            <if test="updateTime != null">
+                updateTime = #{updateTime}
+            </if>
+        </set>
+        where noteId = #{noteId}
+    </update>
+
+    <update id="restoreNote" parameterType="note">
+        update note
+        <set>
+            <if test="noteStatus != null">
+                noteStatus = #{noteStatus},
+            </if>
+
+            <if test="updator != null">
+                updator = #{updator},
+            </if>
+
+            <if test="updateName != null">
+                updateName = #{updateName},
+            </if>
+
+            <if test="updateTime != null">
+                updateTime = #{updateTime}
+            </if>
+        </set>
+        where noteId = #{noteId}
+    </update>
+</mapper>

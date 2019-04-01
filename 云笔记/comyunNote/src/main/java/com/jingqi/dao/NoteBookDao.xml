@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jingqi.dao.NoteBookDao">
+    <resultMap  id="noteBookMap"               type="com.jingqi.domain.NoteBook">
+        <id     property="noteBookId"          column="noteBookId"/>
+        <result property="userId"              column="userId"/>
+        <result property="noteBookType"        column="noteBookType"/>
+        <result property="noteBookName"        column="noteBookName"/>
+        <result property="noteBookDescription" column="noteBookDescription"/>
+        <result property="creator"             column="creator"/>
+        <result property="createName"          column="createName"/>
+        <result property="createTime"          column="createTime"/>
+        <result property="updator"             column="updator"/>
+        <result property="updateName"          column="updateName"/>
+        <result property="updateTime"          column="updateTime"/>
+        <result property="noteBookStatus"      column="noteBookStatus"/>
+    </resultMap>
+
+    <!--查询所有的笔记本-->
+    <select id="findAllNoteBook" resultMap="noteBookMap">
+        select * from notebook
+        <where>
+            <if test="noteBookName != '' and noteBookName != null and noteBookName != 'null'">
+                noteBookName LIKE "%"#{noteBookName}"%"
+            </if>
+
+            <if test="noteBookType != '' and noteBookType != null and noteBookType != 'null'">
+                AND  noteBookType LIKE "%"#{noteBookType}"%"
+            </if>
+
+            <if test="userId != '' and userId != null">
+                AND userId = #{userId}
+            </if>
+
+            AND noteBookStatus = "1"
+        </where>
+         limit #{begin},#{pageSize}
+    </select>
+
+
+    <!--查询所有的回收站笔记本-->
+    <select id="findAllNoteBookBack" resultMap="noteBookMap">
+        select * from notebook
+        <where>
+            <if test="noteBookName != '' and noteBookName != null">
+                noteBookName LIKE "%"#{noteBookName}"%"
+            </if>
+
+            <if test="noteBookType != '' and noteBookType != null">
+                AND  noteBookType LIKE "%"#{noteBookType}"%"
+            </if>
+
+            <if test="updator != '' and updator != null">
+                AND  updator LIKE "%"#{updator}"%"
+            </if>
+
+            <if test="userId != '' and userId != null">
+                AND userId = #{userId}
+            </if>
+
+            AND noteBookStatus = "0"
+        </where>
+        limit #{begin},#{pageSize}
+    </select>
+
+    <!--查询笔记本的总数-->
+    <select id="findByCount" resultType="int">
+        select count(*) from notebook
+        <where>
+            <if test="noteBookName != '' and noteBookName != null and noteBookName != 'null'">
+                noteBookName LIKE "%"#{noteBookName}"%"
+            </if>
+
+            <if test="noteBookType != '' and noteBookType != null and noteBookType != 'null'">
+                AND  noteBookType LIKE "%"#{noteBookType}"%"
+            </if>
+
+            <if test="userId != '' and userId != null">
+                AND userId = #{userId}
+            </if>
+            And noteBookStatus = "1"
+        </where>
+    </select>
+
+    <!--查询笔记本的总数-->
+    <select id="findByCountBack" resultType="int">
+        select count(*) from notebook
+        <where>
+            <if test="noteBookName != '' and noteBookName != null">
+                noteBookName LIKE "%"#{noteBookName}"%"
+            </if>
+
+            <if test="noteBookType != '' and noteBookType != null">
+                AND  noteBookType LIKE "%"#{noteBookType}"%"
+            </if>
+
+            <if test="updator != '' and updator != null">
+                AND  updator LIKE "%"#{updator}"%"
+            </if>
+
+            <if test="userId != '' and userId != null">
+                AND userId = #{userId}
+            </if>
+            And noteBookStatus = "0"
+        </where>
+    </select>
+
+    <!--新建一个笔记本-->
+    <insert id="createByBook" parameterType="noteBook">
+        insert into notebook(noteBookId,
+                             userId,
+                             noteBookType,
+                             noteBookName,
+                             noteBookDescription,
+                             creator,
+                             createName,
+                             createTime,
+                             noteBookStatus)
+                            values(
+                            #{noteBookId},
+                            #{userId},
+                            #{noteBookType},
+                            #{noteBookName},
+                            #{noteBookDescription},
+                            #{creator},
+                            #{createName},
+                            #{createTime},
+                            #{noteBookStatus}
+                            )
+    </insert>
+
+    <!--根据笔记本的id查询该笔记本-->
+    <select id="findByNoteBookId" parameterType="String" resultType="noteBook">
+        select * from notebook where noteBookId = #{id}
+    </select>
+
+    <!--根据笔记本名称查询该笔记-->
+    <select id="findByName" parameterType="String" resultType="noteBook">
+        select * from notebook where noteBookName = #{noteBookName} and noteBookStatus = "1"
+    </select>
+
+    <update id="update" parameterType="noteBook" >
+      update notebook
+      <set>
+          <if test="noteBookType != null">
+          noteBookType = #{noteBookType},
+          </if>
+
+          <if test="noteBookName != null">
+              noteBookName = #{noteBookName},
+          </if>
+
+          <if test="noteBookDescription != null">
+              noteBookDescription = #{noteBookDescription},
+          </if>
+
+          <if test="updator != null">
+              updator = #{updator},
+          </if>
+
+          <if test="updateName != null">
+              updateName = #{updateName},
+          </if>
+
+          <if test="updateTime != null">
+              updateTime = #{updateTime}
+          </if>
+
+      </set>
+        where noteBookId = #{noteBookId}
+    </update>
+    <!--根据该笔记本的id删除该笔记本-->
+    <delete id="deleteNoteBookById" parameterType="String">
+        delete  from notebook where noteBookId = #{noteBookId}
+    </delete>
+
+    <update id="recycleBook" parameterType="noteBook">
+        update notebook
+        <set>
+            <if test="noteBookStatus != null">
+                noteBookStatus = #{noteBookStatus},
+            </if>
+
+            <if test="updator != null">
+                updator = #{updator},
+            </if>
+
+            <if test="updateName != null">
+                updateName = #{updateName},
+            </if>
+
+            <if test="updateTime != null">
+                updateTime = #{updateTime}
+            </if>
+        </set>
+        where noteBookId = #{noteBookId}
+    </update>
+
+    <update id="restoreBook" parameterType="noteBook">
+        update notebook
+        <set>
+            <if test="noteBookStatus != null">
+                noteBookStatus = #{noteBookStatus},
+            </if>
+
+            <if test="updator != null">
+                updator = #{updator},
+            </if>
+
+            <if test="updateName != null">
+                updateName = #{updateName},
+            </if>
+
+            <if test="updateTime != null">
+                updateTime = #{updateTime}
+            </if>
+        </set>
+        where noteBookId = #{noteBookId}
+    </update>
+
+
+</mapper>

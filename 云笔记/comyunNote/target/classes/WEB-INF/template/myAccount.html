@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>云笔记系统</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <link rel="stylesheet" href="static/assets/materialize/css/materialize.min.css" media="screen,projection"/>
+    <!-- Bootstrap Styles-->
+    <link href="static/assets/css/bootstrap.css" rel="stylesheet"/>
+    <!-- FontAwesome Styles-->
+    <link href="static/assets/css/font-awesome.css" rel="stylesheet"/>
+    <!-- Morris Chart Styles-->
+    <link href="static/assets/js/morris/morris-0.4.3.min.css" rel="stylesheet"/>
+    <!-- Custom Styles-->
+    <link href="static/assets/css/custom-styles.css" rel="stylesheet"/>
+
+    <!-- Google Fonts-->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'/>
+    <link rel="stylesheet" href="/static/assets/js/Lightweight-Chart/cssCharts.css">
+</head>
+<body>
+
+<div id="wrapper">
+    <nav class="navbar navbar-default top-navbar" role="navigation">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle waves-effect waves-dark" data-toggle="collapse"
+                    data-target=".sidebar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand waves-effect waves-dark"><i
+                    class="large material-icons">insert_chart</i>
+                <strong>云笔记系统</strong></a>
+
+            <div id="sideNav" href=""><i class="material-icons dp48">toc</i></div>
+        </div>
+        <!--用户登录信息-->
+        <ul class="nav navbar-top-links navbar-right">
+            <li><a class="dropdown-button waves-effect waves-dark" href="#" data-activates="dropdown1"><i
+                    class="fa fa-user fa-fw"></i> <b th:unless="${session.SESSION == null}" th:text="${session.SESSION.userName}"></b> <i
+                    class="material-icons right">arrow_drop_down</i></a></li>
+        </ul>
+    </nav>
+    <!--用户登录栏的具体信息-->
+    <ul id="dropdown1" class="dropdown-content">
+        <li><a th:href="@{/myAccount.do}"><i class="fa fa-user fa-fw"></i>我的账户</a>
+        </li>
+        <li><a th:href="@{/logout.do}"><i class="fa fa-sign-out fa-fw"></i>退出登录</a>
+        </li>
+    </ul>
+    <!--侧边栏-->
+    <nav class="navbar-default navbar-side" role="navigation">
+        <div class="sidebar-collapse">
+            <ul class="nav" id="main-menu">
+
+                <li class="active">
+                    <a th:href="@{/myAccount.do}" class="active-menu waves-effect waves-dark"><i class="fa fa-user"></i>
+                        个人账户信息</a>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </nav>
+    <!--内容主体-->
+    <div id="page-wrapper">
+        <!--内容主题-->
+        <div class="header">
+            <h1 class="page-header">
+               用户信息
+            </h1>
+        </div>
+        <div id="page-inner">
+            <!--自定义内容-->
+            <div class="card">
+                <div class="card-content">
+
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <span>用户名：</span>
+                        </div>
+                        <div class="input-field col s6">
+                            <input id="username" name="username" type="text" th:value="${session.SESSION.userName}" class="validate valid" placeholder="用户名" required/>
+                            <label for="username" class="active">用户名</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <span>密码：</span>
+                        </div>
+                        <div class="input-field col s6">
+                            <input id="password" name="password" type="text" th:value="${session.SESSION.userPassword}" class="validate valid" placeholder="密码" required/>
+                            <label for="password" class="active">密码</label>
+                        </div>
+                    </div>
+
+
+
+                </div>
+                <div class="card-action">
+                    <a href="javascript:void(0)" onclick="modify()">修改</a>
+                    <a href="javascript:void(0)" onclick="reback()">返回</a>
+                </div>
+
+            </div>
+            <!--页脚-->
+            <br>
+            <br>
+            <br>
+            <footer><p class="text-center">Copyright &copy; 2019.</p></footer>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- JS Scripts-->
+<!-- jQuery Js -->
+<script src="static/assets/js/jquery-1.10.2.js"></script>
+
+<!-- Bootstrap Js -->
+<script src="static/assets/js/bootstrap.min.js"></script>
+<script src="static/assets/materialize/js/materialize.min.js"></script>
+<!-- Metis Menu Js -->
+<script src="static/assets/js/jquery.metisMenu.js"></script>
+
+<script src="static/assets/js/easypiechart.js"></script>
+<script src="static/assets/js/easypiechart-data.js"></script>
+
+<script src="static/assets/js/Lightweight-Chart/jquery.chart.js"></script>
+
+<!-- Custom Js -->
+<script src="static/assets/js/custom-scripts.js"></script>
+
+<script>
+
+    /**
+     * 修改用户的个人信息
+     */
+    function modify() {
+        debugger;
+        var userName = $("#username").val();
+        var userPassword = $("#password").val();
+        if(userName.length > 12 || userName.length < 6) {
+            alert("修改的用户名的长度应该在6-12位之间");
+            return ;
+        }
+        if(userPassword.length < 6 || userPassword.length > 12) {
+            alert("修改的密码长度应该在6-12位之间!");
+            return ;
+        }
+        if(confirm('确认修改？')) {
+           $.ajax({
+               url : '/comyunNote/modifyAccount.do',
+               type : 'POST',
+               data :{userName:userName,userPassword:userPassword},
+               success: function (data) {
+                   if('success' == data) {
+                       alert("修改用户信息成功");
+                       window.history.back();
+                   } else {
+                       alert("修改用户信息失败");
+                       return ;
+                   }
+               }
+           });
+        }
+
+    }
+
+    /**
+     * 返回上一次的操作页面
+     */
+    function reback() {
+        window.history.back();
+    }
+</script>
+
+</body>
+</html>

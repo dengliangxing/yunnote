@@ -1,0 +1,60 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-4.3.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+    <!--读取db.properties -->
+    <context:property-placeholder location="classpath:db.properties"/>
+    <!-- 配置数据源 -->
+    <bean id="dataSource"
+          class="org.apache.commons.dbcp.BasicDataSource">
+        <!--数据库驱动 -->
+        <property name="driverClassName" value="${jdbc.driver}" />
+        <!--连接数据库的url -->
+        <property name="url" value="${jdbc.url}" />
+        <!--连接数据库的用户名 -->
+        <property name="username" value="${jdbc.username}" />
+        <!--连接数据库的密码 -->
+        <property name="password" value="${jdbc.password}" />
+    </bean>
+    <!-- 事务管理器 -->
+    <bean id="txManager" class=
+            "org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- 数据源 -->
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- 开启事务注解配置@transactional -->
+    <!-- 开启transaction标记，将标记作用在具体方法上 -->
+    <tx:annotation-driven transaction-manager="txManager"/>
+
+    <!-- AOP配置应用 -->
+    <!-- 开启组件扫描,扫描切面组件 -->
+    <context:component-scan base-package="com.jingqi.aspect"/>
+    <!-- 开启AOP注解配置,支持切面,通知,切入点注解标记 -->
+    <aop:aspectj-autoproxy />
+
+    <!-- 配置 MyBatis的工厂 -->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 数据源 -->
+        <property name="dataSource" ref="dataSource" />
+        <!-- 配置MyBatis的核心配置文件所在位置 -->
+        <property name="configLocation" value="classpath:mybatis-config.xml" />
+    </bean>
+
+    <!-- 接口开发,扫描 com.jingqi.dao包 ，写在此包下的接口即可被扫描到 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.jingqi.dao" />
+    </bean>
+
+    <!-- 配置扫描@Service注解 -->
+    <context:component-scan base-package="com.jingqi.service"/>
+</beans>
